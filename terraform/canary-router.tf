@@ -49,12 +49,19 @@ resource "confluent_schema_registry_cluster" "sr" {
 resource "confluent_service_account" "app-manager" {
   display_name = "app-manager"
   description  = "Service account to manage 'inventory' Kafka cluster"
+
+  depends_on = [
+    confluent_schema_registry_cluster.sr,
+    confluent_kafka_cluster.basic
+  ]
+  
 }
 
-resource "confluent_role_binding" "app-manager-kafka-cluster-admin" {
+
+resource "confluent_role_binding" "app-manager-env-admin" {
   principal   = "User:${confluent_service_account.app-manager.id}"
-  role_name   = "CloudClusterAdmin"
-  crn_pattern = confluent_kafka_cluster.basic.rbac_crn
+  role_name   = "EnvironmentAdmin"
+  crn_pattern = confluent_environment.canary-router.resource_name
 }
 
 resource "confluent_ksql_cluster" "app" {
@@ -72,7 +79,7 @@ resource "confluent_ksql_cluster" "app" {
   depends_on = [
     confluent_kafka_topic.orders,
     confluent_schema_registry_cluster.sr,
-    confluent_role_binding.app-manager-kafka-cluster-admin
+    confluent_role_binding.app-manager-env-admin
   ]
 }
 
@@ -111,7 +118,7 @@ resource "confluent_kafka_topic" "orders"{
    }
 
   depends_on = [
-    confluent_role_binding.app-manager-kafka-cluster-admin
+    confluent_role_binding.app-manager-env-admin
   ]
 }
 
@@ -137,7 +144,7 @@ resource "confluent_connector" "source" {
   }
   depends_on = [
     confluent_kafka_topic.orders,
-    confluent_role_binding.app-manager-kafka-cluster-admin
+    confluent_role_binding.app-manager-env-admin
   ]
 
 }

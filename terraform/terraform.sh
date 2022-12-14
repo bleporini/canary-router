@@ -8,5 +8,6 @@ docker run -ti --rm -v $PWD:/work/terraform -v $PWD/../:/work --workdir /work/te
 	hashicorp/terraform:1.3.5 "$@"
 	#--entrypoint "/bin/sh" hashicorp/terraform:1.3.5 
 	#-e TF_LOG=TRACE \
+	#-e TF_LOG=DEBUG \
 	#-e TF_LOG=ERROR \
 

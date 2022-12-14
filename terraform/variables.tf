@@ -13,13 +13,13 @@ variable "confluent_cloud_api_secret" {
 variable "region" {
   description = "Cloud region"
   type        = string
-  default     = "qatarcentral"
+  default     = "uaenorth"
 }
 
 variable "sr_region" {
   description = "Cloud region"
   type        = string
-  default     = "sgreg-9"
+  default     = "sgreg-6"
 }
 
 variable "cloud" {
