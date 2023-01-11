@@ -42,7 +42,7 @@ clean(){
 docker_kafka="docker run -v $PWD:/work  --workdir /work -ti --rm confluentinc/cp-kafka:7.2.1"
 
 get_offsets(){
-	echo $($docker_kafka kafka-consumer-groups --command-config etc/kafka.properties --bootstrap-server $BOOTSTRAP_SERVER --describe --group $1  2>/dev/null | grep $2 | awk '{print $3, " ", $4}')
+	echo $($docker_kafka kafka-consumer-groups --command-config etc/kafka.properties --bootstrap-server $BOOTSTRAP_SERVER --describe --group $1  2>/dev/null | grep $2 | awk '{print $3, " ", $4}'|sort)
 }
 
 get_rated_query_id(){

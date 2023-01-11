@@ -21,7 +21,6 @@ original topic --> topic with rate
 
 Updating the threshold is done with the following procedure:
 1. Pause the rating query in order to stop the traffic to the services
-2. Wait until the services have no lag
 3. Update the CBR queries according to the new threshold
 4. Restart the rating query
 

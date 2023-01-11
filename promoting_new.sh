@@ -14,6 +14,9 @@ original_offsets_arr=($original_offsets)
 new_service_offsets=$(get_offsets $new_service ${original_topic}_new)
 new_service_offsets_arr=($new_service_offsets)
 
+legacy_service_offsets=$(get_offsets $legacy_service ${original_topic}_legacy)
+legacy_service_offsets_arr=($legacy_service_offsets)
+
 stop_new_service
 stop_legacy_service
 arr_size=${#original_offsets_arr[@]}
@@ -23,8 +26,9 @@ do
 	partition=${original_offsets_arr[$i]}
 	offset=${original_offsets_arr[$i+1]}
 	offset_in_new_topic=${new_service_offsets_arr[$i+1]}
-	new_offset=$(($offset + $offset_in_new_topic))
-	echo $original_topic / Partition $partition: Offset was $offset, offset for new services after migration will be $new_offset \($offset + $offset_in_new_topic \)
+	offset_in_legacy_topic=${legacy_service_offsets_arr[$i+1]}
+	new_offset=$(($offset + $offset_in_new_topic +$offset_in_legacy_topic))
+	echo $original_topic / Partition $partition: Offset was $offset, offset for new services after migration will be $new_offset \($offset + $offset_in_new_topic + $offset_in_legacy_topic\)
 	echo $original_topic,$partition,$new_offset >> etc/new_offsets
 
 	i=$(($i+2))
@@ -34,7 +38,7 @@ echo Disposing useless resources
 DOCKER_RUN_FLAGS="-ti" ./ksql.sh -f cleanup.sql
 
 echo Starting new service on the original topic
-start_new_service $new_service $original_topic
+start_new_service $original_topic
 
 
 

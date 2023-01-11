@@ -2,6 +2,8 @@
 
 . ./commons.sh $1
 
+set -e
+
 pause_rated_persistent_query
 wait_for_0_lag
 

@@ -28,6 +28,7 @@ do
 
         i=$(($i+2))
 done
+echo $offset_partition_criteria > etc/offset_partition_criteria
 
 
 partitions=$(get_partition_count $original_topic)
@@ -36,9 +37,11 @@ partitions=$(get_partition_count $original_topic)
 cat <<EOF > etc/ddl.sql
 SET 'auto.offset.reset'='earliest'; 
 create or replace stream original (original_key $key_type key) with(kafka_topic='$original_topic', value_format='$value_format', key_format='$key_format');
-create or replace stream original_rated with(kafka_topic='${original_topic}_rated', value_format='$value_format', key_format='$key_format') as select *, random() as rate from original where $offset_partition_criteria;
-create or replace stream legacy_version with(kafka_topic='${original_topic}_legacy', value_format='$value_format', key_format='$key_format', partitions=$partitions) as select * from original_rated where rate > 0.1 ;
-create or replace stream new_version with(kafka_topic='${original_topic}_new', value_format='$value_format', key_format='$key_format', partitions=$partitions) as select * from original_rated where rate <= 0.1 ;
+create or replace stream original_rated with(kafka_topic='${original_topic}_rated', value_format='$value_format', key_format='$key_format') as 
+select *, random() <= 0.1 as for_new from original 
+where $offset_partition_criteria;
+create or replace stream legacy_version with(kafka_topic='${original_topic}_legacy', value_format='$value_format', key_format='$key_format', partitions=$partitions) as select * from original_rated where for_new = false ;
+create or replace stream new_version with(kafka_topic='${original_topic}_new', value_format='$value_format', key_format='$key_format', partitions=$partitions) as select * from original_rated where for_new = true ;
 EOF
 
 
